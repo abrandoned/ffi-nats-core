@@ -218,7 +218,7 @@ module FFI
       attach_function :natsSubscription_GetStats, [:pointer, :pointer, :pointer, :pointer, :pointer, :pointer, :pointer], :int, :blocking => true
       attach_function :natsSubscription_IsValid, [:pointer], :bool, :blocking => true
       attach_function :natsSubscription_NextMsg, [:pointer, :pointer, :int64], :int, :blocking => true
-      attach_function :natsSubscription_NoDelay, [:pointer], :int, :blocking => true
+      attach_function :natsSubscription_NoDeliveryDelay, [:pointer], :int, :blocking => true
       attach_function :natsSubscription_SetPendingLimits, [:pointer, :int, :int], :int, :blocking => true
       attach_function :natsSubscription_Unsubscribe, [:pointer], :int, :blocking => true
 
