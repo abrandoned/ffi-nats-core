@@ -5,7 +5,7 @@ require 'ffi/nats/core/version'
 
 Gem::Specification.new do |spec|
   spec.name          = "ffi-nats-core"
-  spec.version       = Ffi::Nats::Core::VERSION
+  spec.version       = FFI::Nats::Core::VERSION
   spec.authors       = ["Brandon Dewitt"]
   spec.email         = ["brandonsdewitt@gmail.com"]
 

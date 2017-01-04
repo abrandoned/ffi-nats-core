@@ -1,4 +1,4 @@
-module Ffi
+module FFI
   module Nats
     module Core
       VERSION = "0.1.0"
