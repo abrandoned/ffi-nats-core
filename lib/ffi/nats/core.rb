@@ -363,8 +363,8 @@ module FFI
 
       def self.test_threaded_single_connection
         start = Time.now
-        num_threads = 4
-        publish_per_thread = 100_000
+        num_threads = 8
+        publish_per_thread = 500_000
         publishes = 0
         threads = []
         subject = "hello"
@@ -380,17 +380,12 @@ module FFI
 
         FFI::Nats::Core.natsConnection_Connect(connection_pointer, options_pointer)
         connection_pointer = connection_pointer.get_pointer(0)
-        lock = Mutex.new
 
         num_threads.times do
           threads << Thread.new do
             publish_per_thread.times do
-              lock.synchronize do
-                publishes = publishes + 1
-                message_size = message.size
-                status = FFI::Nats::Core.natsConnection_Publish(connection_pointer, "#{subject}#{publishes}", message, message_size)
-                puts status unless NATS_STATUS[status] == NATS_STATUS[:NATS_OK]
-              end
+              status = FFI::Nats::Core.natsConnection_Publish(connection_pointer, subject, message, message.size)
+              puts status unless NATS_STATUS[status] == NATS_STATUS[:NATS_OK]
             end
           end
         end
