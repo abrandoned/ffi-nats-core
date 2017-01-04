@@ -84,7 +84,7 @@ module FFI
         :RECONNECTING      #///< The connection is in the process or reconnecting
       ]
 
-      enum :NATS_STATUS, [
+      NATS_STATUS = enum [
         :NATS_OK, 0,                     #< Success
         :NATS_ERR,                       #< Generic error
         :NATS_PROTOCOL_ERROR,            #< Error when parsing a protocol message, or not getting the expected message.
@@ -147,11 +147,11 @@ module FFI
       attach_function :natsConnection_GetStats, [:pointer, :pointer], :int, :blocking => true
       attach_function :natsConnection_IsClosed, [:pointer], :bool, :blocking => true
       attach_function :natsConnection_IsReconnecting, [:pointer], :bool, :blocking => true
-      attach_function :natsConnection_Publish, [:pointer, :string, :pointer, :int], :int, :blocking => true
+      attach_function :natsConnection_Publish, [:pointer, :string, :pointer, :int], NATS_STATUS, :blocking => true
       attach_function :natsConnection_PublishMsg, [:pointer, :pointer], :int, :blocking => true
       attach_function :natsConnection_PublishRequest, [:pointer, :string, :string, :string, :pointer, :int], :int, :blocking => true
       attach_function :natsConnection_PublishRequestString, [:pointer, :string, :string, :string], :int, :blocking => true
-      attach_function :natsConnection_PublishString, [:pointer, :string, :string], :void, :blocking => true
+      attach_function :natsConnection_PublishString, [:pointer, :string, :string], NATS_STATUS, :blocking => true
       attach_function :natsConnection_Request, [:pointer, :pointer, :string, :string, :int, :int64], :int, :blocking => true
       attach_function :natsConnection_RequestString, [:pointer, :pointer, :string, :string, :int64], :int, :blocking => true
       attach_function :natsConnection_Status, [:pointer], :int, :blocking => true
@@ -228,7 +228,7 @@ module FFI
       attach_function :natsStatistics_GetCounts, [:pointer, :pointer, :pointer, :pointer, :pointer, :pointer], :int, :blocking => true
 
       # natsStatus
-      attach_function :natsStatus_GetText, [:NATS_STATUS], :strptr, :blocking => true
+      attach_function :natsStatus_GetText, [NATS_STATUS], :strptr, :blocking => true
 
 
       SubscribeCallback = FFI::Function.new(:void, [:pointer, :pointer, :pointer, :pointer], :blocking => true) do |conn, sub, msg, closure|
@@ -365,6 +365,7 @@ module FFI
         start = Time.now
         num_threads = 4
         publish_per_thread = 100_000
+        publishes = 0
         threads = []
         subject = "hello"
         message = "world"
@@ -379,20 +380,28 @@ module FFI
 
         FFI::Nats::Core.natsConnection_Connect(connection_pointer, options_pointer)
         connection_pointer = connection_pointer.get_pointer(0)
+        lock = Mutex.new
 
         num_threads.times do
           threads << Thread.new do
             publish_per_thread.times do
-              FFI::Nats::Core.natsConnection_PublishString(connection_pointer, subject, message)
+              lock.synchronize do
+                publishes = publishes + 1
+                message_size = message.size
+                status = FFI::Nats::Core.natsConnection_Publish(connection_pointer, "#{subject}#{publishes}", message, message_size)
+                puts status unless NATS_STATUS[status] == NATS_STATUS[:NATS_OK]
+              end
             end
           end
         end
 
         threads.map(&:join)
+        FFI::Nats::Core.natsConnection_Flush(connection_pointer)
         finish = Time.now
         total_time = finish.to_i - start.to_i
         total_time = 1 if total_time.zero?
         puts <<-FINISH
+    PUBLISHES: #{publishes}
     THREADS: #{num_threads}
     PUBLISH PER THREAD: #{publish_per_thread}
     START: #{start}
