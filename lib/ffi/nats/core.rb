@@ -361,6 +361,46 @@ module FFI
     FINISH
       end
 
+      def self.test_threaded_single_connection
+        start = Time.now
+        num_threads = 4
+        publish_per_thread = 100_000
+        threads = []
+        subject = "hello"
+        message = "world"
+        message_size = message.size
+
+        options_pointer = FFI::MemoryPointer.new :pointer
+        connection_pointer = FFI::MemoryPointer.new :pointer
+
+        FFI::Nats::Core.natsOptions_Create(options_pointer)
+        options_pointer = options_pointer.get_pointer(0)
+        FFI::Nats::Core.natsOptions_SetURL(options_pointer, "nats://0.0.0.0:4222")
+
+        FFI::Nats::Core.natsConnection_Connect(connection_pointer, options_pointer)
+        connection_pointer = connection_pointer.get_pointer(0)
+
+        num_threads.times do
+          threads << Thread.new do
+            publish_per_thread.times do
+              FFI::Nats::Core.natsConnection_PublishString(connection_pointer, subject, message)
+            end
+          end
+        end
+
+        threads.map(&:join)
+        finish = Time.now
+        total_time = finish.to_i - start.to_i
+        total_time = 1 if total_time.zero?
+        puts <<-FINISH
+    THREADS: #{num_threads}
+    PUBLISH PER THREAD: #{publish_per_thread}
+    START: #{start}
+    FINISH: #{finish}
+    PER SECOND: #{(num_threads * publish_per_thread)/total_time}
+    FINISH
+      end
+
       def self.test_threaded
         start = Time.now
         num_threads = 4
