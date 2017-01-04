@@ -364,7 +364,7 @@ module FFI
       def self.test_threaded
         start = Time.now
         num_threads = 4
-        publish_per_thread = 10_000
+        publish_per_thread = 100_000
         threads = []
         subject = "hello"
         message = "world"
@@ -405,7 +405,7 @@ module FFI
     PUBLISH PER THREAD: #{publish_per_thread}
     START: #{start}
     FINISH: #{finish}
-    PER SECOND: #{(num_threads * publish_per_thread)/(finish.to_i - start.to_i)}
+    PER SECOND: #{(num_threads * publish_per_thread)/total_time}
     FINISH
       end
 
