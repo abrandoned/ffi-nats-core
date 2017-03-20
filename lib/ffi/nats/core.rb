@@ -27,7 +27,7 @@ module FFI
       begin
         # bias the library discovery to a path inside the gem first, then
         # to the usual system paths
-        inside_gem = File.join(File.dirname(__FILE__), '..', '..', 'ext')
+        inside_gem = File.join(File.dirname(__FILE__), '..', '..', '..', 'ext')
         local_path = FFI::Platform::IS_WINDOWS ? ENV['PATH'].split(';') : ENV['PATH'].split(':')
         env_path = [ ENV['NATS_LIB_PATH'] ].compact
         rbconfig_path = RbConfig::CONFIG["libdir"]
@@ -152,7 +152,7 @@ module FFI
       attach_function :natsConnection_PublishRequest, [:pointer, :string, :string, :string, :pointer, :int], :int, :blocking => true
       attach_function :natsConnection_PublishRequestString, [:pointer, :string, :string, :string], :int, :blocking => true
       attach_function :natsConnection_PublishString, [:pointer, :string, :string], NATS_STATUS, :blocking => true
-      attach_function :natsConnection_Request, [:pointer, :pointer, :string, :string, :int, :int64], :int, :blocking => true
+      attach_function :natsConnection_Request, [:pointer, :pointer, :string, :pointer, :int, :int64], :int, :blocking => true
       attach_function :natsConnection_RequestString, [:pointer, :pointer, :string, :string, :int64], :int, :blocking => true
       attach_function :natsConnection_Status, [:pointer], :int, :blocking => true
       attach_function :natsConnection_Subscribe, [:pointer, :pointer, :string, :on_message_function, :pointer], :int, :blocking => true
