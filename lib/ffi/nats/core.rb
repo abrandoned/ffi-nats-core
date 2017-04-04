@@ -140,6 +140,7 @@ module FFI
       attach_function :natsConnection_ConnectTo, [:pointer, :string], :int, :blocking => true
       attach_function :natsConnection_Destroy, [:pointer], :void, :blocking => true
       attach_function :natsConnection_Flush, [:pointer], :int, :blocking => true
+      attach_function :natsConnection_FlushTimeout, [:pointer, :int], :int, :blocking => true
       attach_function :natsConnection_GetConnectedServerId, [:pointer, :buffer_out, :size_t], :int, :blocking => true
       attach_function :natsConnection_GetConnectedUrl, [:pointer, :buffer_out, :size_t], :int, :blocking => true
       attach_function :natsConnection_GetLastError, [:pointer, :pointer], :int, :blocking => true
@@ -147,11 +148,11 @@ module FFI
       attach_function :natsConnection_GetStats, [:pointer, :pointer], :int, :blocking => true
       attach_function :natsConnection_IsClosed, [:pointer], :bool, :blocking => true
       attach_function :natsConnection_IsReconnecting, [:pointer], :bool, :blocking => true
-      attach_function :natsConnection_Publish, [:pointer, :string, :pointer, :int], NATS_STATUS, :blocking => true
+      attach_function :natsConnection_Publish, [:pointer, :string, :pointer, :int], :int, :blocking => true
       attach_function :natsConnection_PublishMsg, [:pointer, :pointer], :int, :blocking => true
-      attach_function :natsConnection_PublishRequest, [:pointer, :string, :string, :string, :pointer, :int], :int, :blocking => true
+      attach_function :natsConnection_PublishRequest, [:pointer, :string, :string, :string, :int], :int, :blocking => true
       attach_function :natsConnection_PublishRequestString, [:pointer, :string, :string, :string], :int, :blocking => true
-      attach_function :natsConnection_PublishString, [:pointer, :string, :string], NATS_STATUS, :blocking => true
+      attach_function :natsConnection_PublishString, [:pointer, :string, :string], :int, :blocking => true
       attach_function :natsConnection_Request, [:pointer, :pointer, :string, :pointer, :int, :int64], :int, :blocking => true
       attach_function :natsConnection_RequestString, [:pointer, :pointer, :string, :string, :int64], :int, :blocking => true
       attach_function :natsConnection_Status, [:pointer], :int, :blocking => true
@@ -204,7 +205,7 @@ module FFI
       attach_function :natsOptions_SetURL, [:pointer, :string], :int, :blocking => true
       attach_function :natsOptions_SetUserInfo, [:pointer, :string, :string], :int, :blocking => true
       attach_function :natsOptions_SetVerbose, [:pointer, :bool], :int, :blocking => true
-      attach_function :natsOptions_UseGlobalMessageDelivery, [:pointer, :bool], :void, :blocking => true
+      attach_function :natsOptions_UseGlobalMessageDelivery, [:pointer, :bool], :int, :blocking => true
 
       # natsSubscription
       attach_function :natsSubscription_AutoUnsubscribe, [:pointer, :int], :int, :blocking => true
