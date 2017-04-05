@@ -119,6 +119,8 @@ module FFI
 
       # message handler callback definition
       callback :on_message_function, [:pointer, :pointer, :pointer, :pointer], :void
+      callback :on_error_function, [:pointer, :pointer, :int, :pointer], :void
+      callback :on_connected_function, [:pointer, :pointer], :void
 
       # nats
       attach_function :nats_Close, [], :void, :blocking => true
@@ -150,7 +152,7 @@ module FFI
       attach_function :natsConnection_IsReconnecting, [:pointer], :bool, :blocking => true
       attach_function :natsConnection_Publish, [:pointer, :string, :pointer, :int], :int, :blocking => true
       attach_function :natsConnection_PublishMsg, [:pointer, :pointer], :int, :blocking => true
-      attach_function :natsConnection_PublishRequest, [:pointer, :string, :string, :string, :int], :int, :blocking => true
+      attach_function :natsConnection_PublishRequest, [:pointer, :string, :string, :pointer, :int], :int, :blocking => true
       attach_function :natsConnection_PublishRequestString, [:pointer, :string, :string, :string], :int, :blocking => true
       attach_function :natsConnection_PublishString, [:pointer, :string, :string], :int, :blocking => true
       attach_function :natsConnection_Request, [:pointer, :pointer, :string, :pointer, :int, :int64], :int, :blocking => true
@@ -189,6 +191,9 @@ module FFI
       attach_function :natsOptions_SetAllowReconnect, [:pointer, :bool], :int, :blocking => true
       attach_function :natsOptions_SetCiphers, [:pointer, :string], :int, :blocking => true
       attach_function :natsOptions_SetExpectedHostname, [:pointer, :string], :int, :blocking => true
+      attach_function :natsOptions_SetErrorHandler, [:pointer, :on_error_function, :pointer], :int, :blocking => true
+      attach_function :natsOptions_SetDisconnectedCB, [:pointer, :on_connected_function, :pointer], :int, :blocking => true
+      attach_function :natsOptions_SetReconnectedCB, [:pointer, :on_connected_function, :pointer], :int, :blocking => true
       attach_function :natsOptions_SetMaxPingsOut, [:pointer, :int64], :int, :blocking => true
       attach_function :natsOptions_SetMaxPendingMsgs, [:pointer, :int], :int, :blocking => true
       attach_function :natsOptions_SetMaxReconnect, [:pointer, :int], :int, :blocking => true
