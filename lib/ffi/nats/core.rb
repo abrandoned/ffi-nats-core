@@ -56,9 +56,8 @@ module FFI
         ]).compact.map{|path| "#{path}/libnats.#{FFI::Platform::LIBSUFFIX}"}
         ffi_lib(NATS_LIB_PATHS + %w{libnats})
 
-      rescue LoadError
-        if NATS_LIB_PATHS.any? {|path|
-          File.file? File.join(path, "libnats.#{FFI::Platform::LIBSUFFIX}")}
+      rescue LoadError => error
+        if NATS_LIB_PATHS.any? {|path| File.file? File.join(path) }
           warn "Unable to load this gem. The libnats library exists, but cannot be loaded."
           warn "Set NATS_LIB_PATH if custom load path is desired"
           warn "If this is Windows:"
@@ -73,7 +72,7 @@ module FFI
           warn "For non-Windows platforms, make sure libnats is located in this search path:"
           warn NATS_LIB_PATHS.inspect
         end
-        raise LoadError, "The libnats library (or DLL) could not be loaded"
+        raise error
       end
 
       enum :NATS_CONN_STATUS, [
