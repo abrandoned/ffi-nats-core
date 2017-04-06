@@ -27,7 +27,8 @@ module FFI
       begin
         # bias the library discovery to a path inside the gem first, then
         # to the usual system paths
-        inside_gem = File.join(File.dirname(__FILE__), '..', '..', '..', 'ext')
+        gem_base = File.join(File.dirname(__FILE__), '..', '..', '..')
+        inside_gem = File.join(gem_base, 'ext')
         local_path = FFI::Platform::IS_WINDOWS ? ENV['PATH'].split(';') : ENV['PATH'].split(':')
         env_path = [ ENV['NATS_LIB_PATH'] ].compact
         rbconfig_path = RbConfig::CONFIG["libdir"]
@@ -57,7 +58,7 @@ module FFI
              '/usr/local/lib', '/opt/local/lib', homebrew_path, '/usr/lib64'
             ]
           else
-            ["../../../vendor/cnats/build/src"]
+            [File.join(gem_base, "vendor/cnats/build/src")]
           end
 
         NATS_LIB_PATHS = nats_lib_paths.
