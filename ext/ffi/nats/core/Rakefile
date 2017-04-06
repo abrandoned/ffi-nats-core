@@ -39,6 +39,9 @@ end
 
 desc "Build the cnats shared lib"
 task :compile_cnats do
+  # Do not attempt to install if we want to use the system nats lib
+  next if ENV.key?("NATS_USE_SYSTEM_LIB")
+
   if !find_executable("cmake")
     abort "ERROR: CMake is required to build ffi-nats-core."
   end

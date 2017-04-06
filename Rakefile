@@ -10,7 +10,6 @@ namespace :cnats do
 
   desc "checkout cnats source"
   task :checkout do
-    puts ::File.directory?("vendor/cnats/build")
     unless ::File.directory?("vendor/cnats/build")
       sh "git submodule update --init"
     end
