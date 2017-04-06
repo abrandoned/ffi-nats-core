@@ -1,0 +1,74 @@
+require "rubygems"
+require "fileutils"
+require "ffi"
+
+# Copied fom mkmf
+def find_executable(bin, path = nil)
+  executable_file = proc do |name|
+    begin
+      stat = File.stat(name)
+    rescue SystemCallError
+    else
+      next name if stat.file? and stat.executable?
+    end
+  end
+
+  exts = config_string('EXECUTABLE_EXTS') {|s| s.split} || config_string('EXEEXT') {|s| [s]}
+  if File.expand_path(bin) == bin
+    return bin if executable_file.call(bin)
+    if exts
+      exts.each {|ext| executable_file.call(file = bin + ext) and return file}
+    end
+    return nil
+  end
+  if path ||= ENV['PATH']
+    path = path.split(File::PATH_SEPARATOR)
+  else
+    path = %w[/usr/local/bin /usr/ucb /usr/bin /bin]
+  end
+  file = nil
+  path.each do |dir|
+    return file if executable_file.call(file = File.join(dir, bin))
+    if exts
+      exts.each {|ext| executable_file.call(ext = file + ext) and return ext}
+    end
+  end
+  nil
+end
+
+
+def sys(cmd)
+  puts " -- #{cmd}"
+  unless ret = system(cmd)
+    raise "ERROR: '#{cmd}' failed"
+  end
+  ret
+end
+
+if !find_executable("cmake")
+  abort "ERROR: CMake is required to build ffi-nats-core."
+end
+
+CWD = ::File.expand_path(::File.dirname(__FILE__))
+CNATS_DIR = ::File.join(CWD, "..", "..", "..", "..", "vendor", "cnats")
+
+::Dir.chdir(CNATS_DIR) do
+  ::Dir.mkdir("build") if !Dir.exists?("build")
+
+  ::Dir.chdir("build") do
+    sys("cmake ..")
+    sys("make nats")
+  end
+end
+
+unless ::File.exist?(::File.join(CNATS_DIR, "build", "libnats.#{::FFI::Platform::LIBSUFFIX}"))
+  abort "ERROR: Failed to build nats"
+end
+
+# This is normally set by calling create_makefile() but we don't need that
+# method since we'll provide a dummy Makefile. Without setting this value
+# RubyGems will abort the installation.
+$makefile_created = true
+$extkm = true
+
+create_makefile("ffi/nats/core")
