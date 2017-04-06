@@ -13,12 +13,8 @@ def find_executable(bin, path = nil)
     end
   end
 
-  exts = config_string('EXECUTABLE_EXTS') {|s| s.split} || config_string('EXEEXT') {|s| [s]}
   if File.expand_path(bin) == bin
     return bin if executable_file.call(bin)
-    if exts
-      exts.each {|ext| executable_file.call(file = bin + ext) and return file}
-    end
     return nil
   end
   if path ||= ENV['PATH']
@@ -29,9 +25,6 @@ def find_executable(bin, path = nil)
   file = nil
   path.each do |dir|
     return file if executable_file.call(file = File.join(dir, bin))
-    if exts
-      exts.each {|ext| executable_file.call(ext = file + ext) and return ext}
-    end
   end
   nil
 end
@@ -61,14 +54,6 @@ CNATS_DIR = ::File.join(CWD, "..", "..", "..", "..", "vendor", "cnats")
   end
 end
 
-unless ::File.exist?(::File.join(CNATS_DIR, "build", "libnats.#{::FFI::Platform::LIBSUFFIX}"))
+unless ::File.exist?(::File.join(CNATS_DIR, "build", "src", "libnats.#{::FFI::Platform::LIBSUFFIX}"))
   abort "ERROR: Failed to build nats"
 end
-
-# This is normally set by calling create_makefile() but we don't need that
-# method since we'll provide a dummy Makefile. Without setting this value
-# RubyGems will abort the installation.
-$makefile_created = true
-$extkm = true
-
-create_makefile("ffi/nats/core")
