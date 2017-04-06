@@ -51,9 +51,18 @@ module FFI
         ENV['RUBYOPT'] = rubyopt
 
         # Search for libnats in the following order...
-        NATS_LIB_PATHS = ([inside_gem] + env_path + local_path + [rbconfig_path] + [
-          '/usr/local/lib', '/opt/local/lib', homebrew_path, '/usr/lib64'
-        ]).compact.map{|path| "#{path}/libnats.#{FFI::Platform::LIBSUFFIX}"}
+        nats_lib_paths =
+          if ENV.key?("NATS_USE_SYSTEM_LIB")
+            [inside_gem] + env_path + local_path + [rbconfig_path] + [
+             '/usr/local/lib', '/opt/local/lib', homebrew_path, '/usr/lib64'
+            ]
+          else
+            ["../../../vendor/cnats/build/src"]
+          end
+
+        NATS_LIB_PATHS = nats_lib_paths.
+          compact.map{|path| "#{path}/libnats.#{FFI::Platform::LIBSUFFIX}"}
+
         ffi_lib(NATS_LIB_PATHS + %w{libnats})
 
       rescue LoadError => error
