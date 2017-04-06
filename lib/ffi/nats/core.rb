@@ -27,7 +27,8 @@ module FFI
       begin
         # bias the library discovery to a path inside the gem first, then
         # to the usual system paths
-        inside_gem = File.join(File.dirname(__FILE__), '..', '..', '..', 'ext')
+        gem_base = File.join(File.dirname(__FILE__), '..', '..', '..')
+        inside_gem = File.join(gem_base, 'ext')
         local_path = FFI::Platform::IS_WINDOWS ? ENV['PATH'].split(';') : ENV['PATH'].split(':')
         env_path = [ ENV['NATS_LIB_PATH'] ].compact
         rbconfig_path = RbConfig::CONFIG["libdir"]
@@ -51,9 +52,18 @@ module FFI
         ENV['RUBYOPT'] = rubyopt
 
         # Search for libnats in the following order...
-        NATS_LIB_PATHS = ([inside_gem] + env_path + local_path + [rbconfig_path] + [
-          '/usr/local/lib', '/opt/local/lib', homebrew_path, '/usr/lib64'
-        ]).compact.map{|path| "#{path}/libnats.#{FFI::Platform::LIBSUFFIX}"}
+        nats_lib_paths =
+          if ENV.key?("NATS_USE_SYSTEM_LIB")
+            [inside_gem] + env_path + local_path + [rbconfig_path] + [
+             '/usr/local/lib', '/opt/local/lib', homebrew_path, '/usr/lib64'
+            ]
+          else
+            [File.join(gem_base, "vendor/cnats/build/src")]
+          end
+
+        NATS_LIB_PATHS = nats_lib_paths.
+          compact.map{|path| "#{path}/libnats.#{FFI::Platform::LIBSUFFIX}"}
+
         ffi_lib(NATS_LIB_PATHS + %w{libnats})
 
       rescue LoadError => error
