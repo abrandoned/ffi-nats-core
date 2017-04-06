@@ -46,7 +46,7 @@ CWD = ::File.expand_path(::File.dirname(__FILE__))
 CNATS_DIR = ::File.join(CWD, "..", "..", "..", "..", "vendor", "cnats")
 
 ::Dir.chdir(CNATS_DIR) do
-  ::Dir.mkdir("build") if !Dir.exists?("build")
+  ::Dir.mkdir("build") unless ::Dir.exists?("build")
 
   ::Dir.chdir("build") do
     sys("cmake ..")
