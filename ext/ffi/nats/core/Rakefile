@@ -29,7 +29,6 @@ def find_executable(bin, path = nil)
   nil
 end
 
-
 def sys(cmd)
   puts " -- #{cmd}"
   unless ret = system(cmd)
@@ -38,22 +37,27 @@ def sys(cmd)
   ret
 end
 
-if !find_executable("cmake")
-  abort "ERROR: CMake is required to build ffi-nats-core."
-end
+desc "Build the cnats shared lib"
+task :compile_cnats do
+  if !find_executable("cmake")
+    abort "ERROR: CMake is required to build ffi-nats-core."
+  end
 
-CWD = ::File.expand_path(::File.dirname(__FILE__))
-CNATS_DIR = ::File.join(CWD, "..", "..", "..", "..", "vendor", "cnats")
+  CWD = ::File.expand_path(::File.dirname(__FILE__))
+  CNATS_DIR = ::File.join(CWD, "..", "..", "..", "..", "vendor", "cnats")
 
-::Dir.chdir(CNATS_DIR) do
-  ::Dir.mkdir("build") unless ::Dir.exists?("build")
+  ::Dir.chdir(CNATS_DIR) do
+    ::Dir.mkdir("build") unless ::Dir.exists?("build")
 
-  ::Dir.chdir("build") do
-    sys("cmake ..")
-    sys("make nats")
+    ::Dir.chdir("build") do
+      sys("cmake ..")
+      sys("make nats")
+    end
+  end
+
+  unless ::File.exist?(::File.join(CNATS_DIR, "build", "src", "libnats.#{::FFI::Platform::LIBSUFFIX}"))
+    abort "ERROR: Failed to build nats"
   end
 end
 
-unless ::File.exist?(::File.join(CNATS_DIR, "build", "src", "libnats.#{::FFI::Platform::LIBSUFFIX}"))
-  abort "ERROR: Failed to build nats"
-end
+task :default => :compile_cnats
