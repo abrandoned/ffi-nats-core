@@ -16,6 +16,14 @@ Gem::Specification.new do |spec|
   spec.files         = `git ls-files -z`.split("\x0").reject do |f|
     f.match(%r{^(test|spec|features)/})
   end
+
+  # cnats files
+  spec.files         += Dir.glob("vendor/cnats/CMakeLists.txt")
+  spec.files         += Dir.glob("vendor/cnats/adapters/**/*")
+  spec.files         += Dir.glob("vendor/cnats/src/**/*")
+  spec.files         += Dir.glob("vendor/cnats/test/**/*")
+  spec.files         += Dir.glob("vendor/cnats/examples/**/*")
+
   spec.bindir        = "exe"
   spec.extensions    = "ext/ffi/nats/core/Rakefile"
   spec.executables   = spec.files.grep(%r{^exe/}) { |f| File.basename(f) }
